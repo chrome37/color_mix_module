@@ -264,6 +264,7 @@ void L6470_transfer4(int add,int bytes,long val){//2台目に送信
 
 void L6470_send4(unsigned char add_or_val){//2台目に送信
   digitalWrite(PIN_SPI_SS, LOW); // ~SSイネーブル。
+  SPI.transfer(0); // 0送信。
   SPI.transfer(add_or_val); // アドレスもしくはデータ送信。
   SPI.transfer(0); // 0送信。
   SPI.transfer(0); // 0送信。
@@ -284,6 +285,7 @@ long L6470_getparam4(int add,int bytes){//2台目に送信
   for(int i=0;i<=bytes-1;i++){
     val = val << 8;
     digitalWrite(PIN_SPI_SS, LOW); // ~SSイネーブル。
+    SPI.transfer(0x00); // アドレスもしくはデータ送信。
     val = val | SPI.transfer(0x00); // アドレスもしくはデータ送信。
     SPI.transfer(0x00); // アドレスもしくはデータ送信。
     SPI.transfer(0x00); // アドレスもしくはデータ送信。

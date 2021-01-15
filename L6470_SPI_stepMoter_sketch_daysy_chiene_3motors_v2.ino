@@ -25,6 +25,7 @@ SS - CS共通
 #define PIN_BUSY2 48
 #define PIN_BUSY3 47
 #define PIN_BUSY4 46
+#define PIN_BUSY5 45
 
 // COMMAND
 String COMMAND_COLOR = "COLOR";//実装済み
@@ -37,6 +38,8 @@ String PARAMETER_B = "B";
 String PARAMETER_C = "C";
 String PARAMETER_M = "M";
 String PARAMETER_Y = "Y";
+String PARAMETER_K = "K";
+String PARAMETER_W = "W";
 
 String inString = "";
 char inChar;
@@ -49,6 +52,7 @@ int Color_worktime_c ;
 int Color_worktime_m ;
 int Color_worktime_y ;
 int Color_worktime_k ;
+int Color_worktime_w ;
 int Pump_worktime;
 int Pallet_angle;
 int i;
@@ -73,6 +77,7 @@ void setup()
   pinMode(PIN_BUSY2, INPUT_PULLUP);
   pinMode(PIN_BUSY3, INPUT_PULLUP);
   pinMode(PIN_BUSY4, INPUT_PULLUP);
+  pinMode(PIN_BUSY5, INPUT_PULLUP);
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setBitOrder(MSBFIRST);
@@ -82,14 +87,17 @@ void setup()
      L6470_resetdevice2(); //2台目のL6470リセット
      L6470_resetdevice3(); //3台目のL6470リセット
      L6470_resetdevice4();
+     L6470_resetdevice5();
      L6470_setup();  //1台目のL6470を設定 
      L6470_setup2();  //2台目のL6470を設定 
      L6470_setup3();  //3台目のL6470を設定 
      L6470_setup4();
+     L6470_setup5();
      L6470_getstatus(); //1台目のフラグ解放
      L6470_getstatus2();//2台目のフラグ解放
      L6470_getstatus3();//3台目のフラグ解放
      L6470_getstatus4();
+     L6470_getstatus5();
 
 
  MsTimer2::set(25, fulash);//シリアルモニター用のタイマー割り込み
@@ -215,6 +223,10 @@ void loop(){
           Color_worktime_k = inString.substring(25, 29).toInt(); //動作時間を10to14をサブストリングに分離、INT形式にして格納
           Serial.print("K");
           Serial.print(Color_worktime_k);
+          Serial.println(" ");  
+          Color_worktime_w = inString.substring(31, 35).toInt(); //動作時間を10to14をサブストリングに分離、INT形式にして格納
+          Serial.print("W");
+          Serial.print(Color_worktime_w);
           Serial.println(" ");        
           //実行
           MotorDirection = inString.substring(30);
@@ -227,6 +239,8 @@ void loop(){
             L6470_move2(0,Color_worktime_m);
             L6470_move3(0,Color_worktime_y);
             L6470_move4(0,Color_worktime_k);
+            L6470_move5(0,Color_worktime_w);
+           
             Serial.print("Go forward.");
           /*
           } else if  ( PARAMETER_B == MotorDirection ) {
@@ -302,6 +316,20 @@ L6470_setparam_kvalacc4(0x28); //[R, WR]加速時励磁電圧default 0x29 (8bit)
 L6470_setparam_kvaldec4(0x28); //[R, WR]減速時励磁電圧default 0x29 (8bit) (Vs[V]*val/256)
 
 L6470_setparam_stepmood4(0x02); //ステップモードdefault 0x07 (1+3+1+3bit)
+}
+
+void L6470_setup5(){
+L6470_setparam_acc5(0x30); //[R, WS] 加速度default 0x08A (12bit) (14.55*val+14.55[step/s^2])
+L6470_setparam_dec5(0x30); //[R, WS] 減速度default 0x08A (12bit) (14.55*val+14.55[step/s^2])
+L6470_setparam_maxspeed5(0x2a); //[R, WR]最大速度default 0x041 (10bit) (15.25*val+15.25[step/s])
+L6470_setparam_minspeed5(0x1200); //[R, WS]最小速度default 0x000 (1+12bit) (0.238*val[step/s])
+L6470_setparam_fsspd5(0x027); //[R, WR]μステップからフルステップへの切替点速度default 0x027 (10bit) (15.25*val+7.63[step/s])
+L6470_setparam_kvalhold5(0x28); //[R, WR]停止時励磁電圧default 0x29 (8bit) (Vs[V]*val/256)
+L6470_setparam_kvalrun5(0x28); //[R, WR]定速回転時励磁電圧default 0x29 (8bit) (Vs[V]*val/256)
+L6470_setparam_kvalacc5(0x28); //[R, WR]加速時励磁電圧default 0x29 (8bit) (Vs[V]*val/256)
+L6470_setparam_kvaldec5(0x28); //[R, WR]減速時励磁電圧default 0x29 (8bit) (Vs[V]*val/256)
+
+L6470_setparam_stepmood5(0x02); //ステップモードdefault 0x07 (1+3+1+3bit)
 }
 
 
